@@ -1,0 +1,30 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+Compute the standard deviation of a number stream on stdin
+
+Author: Gertjan van den Burg
+License: See LICENSE file
+Copyright (c) 2020, G.J.J. van den Burg
+
+"""
+
+import sys
+import statistics
+
+
+def main():
+    observations = []
+    for line in sys.stdin:
+        if not line.strip():
+            continue
+        val = float(line.strip())
+        observations.append(val)
+
+    std = statistics.stdev(observations)
+    print(std)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,56 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+Perform a paired t-test on a data stream of matched observations from two 
+experiments
+
+Author: Gertjan van den Burg
+License: See LICENSE file
+Copyright (c) 2020, G.J.J. van den Burg
+
+"""
+
+import argparse
+import sys
+
+from scipy.stats import ttest_rel
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-d",
+        "--delimiter",
+        help="Delimiter between the two observations on each line. Default is whitespace",
+    )
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+    sep = args.delimiter
+
+    a = []
+    b = []
+
+    for line in sys.stdin:
+        if not line.strip():
+            continue
+
+        values = line.strip().split(sep)
+        if len(values) != 2:
+            raise ValueError("Unexpected input on line: %s" % line.strip())
+
+        val = float(values[0])
+        a.append(val)
+
+        val = float(values[1])
+        b.append(val)
+
+    stat, pval = ttest_rel(a, b, nan_policy="omit")
+    print(f"Test statistic: {stat:.4f} (p = {pval:.4f})")
+
+
+if __name__ == "__main__":
+    main()
