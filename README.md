@@ -3,6 +3,15 @@
 A growing collection of handy scripts to do minor statistical computations and 
 plotting from the command line.
 
+## Installation
+
+Simply clone this repository and add the ``scripts`` directory to your 
+``PATH`` variable. For instance, in ``~/.bashrc`` add:
+
+```bash
+export PATH=$PATH:/path/to/cli_stats/scripts
+```
+
 ## Examples
 
 ### Paired t-test
