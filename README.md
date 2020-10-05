@@ -1,4 +1,4 @@
-# Command-line Statists Tools
+# Command-line Statistics Tools
 
 A growing collection of handy scripts to do minor statistical computations and 
 plotting from the command line.
