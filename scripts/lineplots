@@ -25,6 +25,12 @@ def parse_args():
         action="store_true",
     )
     parser.add_argument(
+        "-c",
+        "--consolidate",
+        help="Plot in a single plot instead of subplots",
+        action="store_true",
+    )
+    parser.add_argument(
         "-n",
         "--no-scatter",
         help="Disable the scatter plot component",
@@ -34,6 +40,12 @@ def parse_args():
         "-d",
         "--delimiter",
         help="Delimiter between observations of different dimensions. Default is whitespace",
+    )
+    parser.add_argument(
+        "-t",
+        "--transpose",
+        help="Transpose the data before plotting",
+        action="store_true",
     )
     return parser.parse_args()
 
@@ -52,10 +64,17 @@ def main():
         row = []
         for value in values:
             if value.strip():
-                row.append(float(value))
+                try:
+                    v = float(value)
+                except ValueError:
+                    v = float('nan')
+                row.append(v)
             else:
                 row.append(float("nan"))
         data.append(row)
+
+    if args.transpose:
+        data = list(map(list, zip(*data)))
 
     dims = set(map(len, data))
     if not len(dims) == 1:
@@ -70,14 +89,23 @@ def main():
 
     dim = data.shape[1]
 
-    fig, axs = plt.subplots(dim, 1, squeeze=False)
-    for d in range(dim):
-        if not args.no_scatter:
-            axs[d, 0].scatter(xs, data[:, d])
-        axs[d, 0].plot(xs, data[:, d])
+    if args.consolidate:
+        for d in range(dim):
+            if not args.no_scatter:
+                plt.scatter(xs, data[:, d])
+            plt.plot(xs, data[:, d])
+    else:
+        fig, axs = plt.subplots(dim, 1, squeeze=False)
+        for d in range(dim):
+            if not args.no_scatter:
+                axs[d, 0].scatter(xs, data[:, d])
+            axs[d, 0].plot(xs, data[:, d])
 
     plt.show()
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        raise SystemExit(1)
