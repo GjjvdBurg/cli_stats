@@ -10,14 +10,29 @@ Copyright (c) 2020, G.J.J. van den Burg
 
 """
 
+import argparse
 import sys
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', '--ignore', help='Ignore non-numeric values', 
+            action='store_true')
+    return parser.parse_args()
+
 def main():
+    args = parse_args()
     total = 0.0
     for line in sys.stdin:
         if not line.strip():
             continue
-        total += float(line.strip())
+        try:
+            value = float(line.strip())
+        except ValueError:
+            if args.ignore:
+                continue
+            else:
+                raise
+        total += value
     print(total)
 
 
