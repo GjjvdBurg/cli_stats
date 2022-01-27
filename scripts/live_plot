@@ -1,0 +1,99 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+Watch a file for updates and live plot the lines
+
+Author: Gertjan van den Burg
+
+"""
+
+import argparse
+import matplotlib.animation as animation
+import matplotlib.pyplot as plt
+import os
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("input", help="Input file to watch")
+    parser.add_argument(
+        "-x",
+        "--have-x",
+        help="Shared x coordinate is stored in the first field.",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--no-infer-x",
+        help="Disable automatically inferring whether an x-axis is present",
+        action="store_true",
+    )
+
+    parser.add_argument(
+        "-d",
+        "--delimiter",
+        help="Delimiter between observations on the same line. Default is whitespace",
+    )
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+    sep = args.delimiter
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    def animate(idx):
+        if not os.path.exists(args.input):
+            return
+        with open(args.input, "r") as fp:
+            lines = [l.strip() for l in fp]
+
+        data = []
+        for line in lines:
+            values = line.split(sep)
+            row = []
+            for value in values:
+                if value.strip():
+                    try:
+                        v = float(value)
+                    except ValueError:
+                        v = float("nan")
+                    row.append(v)
+                else:
+                    row.append(float("nan"))
+
+            data.append(row)
+
+        # transpose so we have [xs, ys1, ys2, ...]
+        data = list(map(list, zip(*data)))
+
+        ax.clear()
+
+        if args.no_infer_x:
+            if args.have_x:
+                xs = data.pop(0)
+            else:
+                xs = list(range(len(data[0])))
+        else:
+            increasing = True
+            for i in range(1, len(data[0])):
+                if not data[0][i] > data[0][i - 1]:
+                    increasing = False
+                    break
+            if increasing:
+                xs = data.pop(0)
+            else:
+                xs = list(range(len(data[0])))
+
+        for ys in data:
+            ax.plot(xs, ys)
+        ax.set_title(args.input)
+
+    anim = animation.FuncAnimation(fig, animate, interval=1000)
+    plt.show()
+
+
+if __name__ == "__main__":
+    main()
